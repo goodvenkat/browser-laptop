@@ -8,6 +8,7 @@ const Immutable = require('immutable')
 const ImmutableComponent = require('../../app/renderer/components/immutableComponent')
 const messages = require('../constants/messages')
 const aboutActions = require('./aboutActions')
+const appActions = require('../actions/appActions')
 
 const {StyleSheet, css} = require('aphrodite/no-important')
 const globalStyles = require('../../app/renderer/components/styles/global')
@@ -29,21 +30,25 @@ class ExtensionItem extends ImmutableComponent {
   onContextMenu (e) {
     aboutActions.contextMenu(this.props.extension.toJS(), 'extensions', e)
   }
-  onInspect (e) {
-    const extensionId = this.props.extension.get('id')
-    chrome.tabs.query(
-      {currentWindow: true, active: true},
-      function (tabArray) {
-        chrome.ipcRenderer.send('load-url-requested', tabArray[0].id, 'chrome-extension://' + extensionId + '/_generated_background_page.html')
-      }
-    )
-  }
   get icon () {
     return this.props.extension.getIn(['manifest', 'icons', '128']) ||
       this.props.extension.getIn(['manifest', 'icons', '64']) ||
       this.props.extension.getIn(['manifest', 'icons', '48']) ||
       this.props.extension.getIn(['manifest', 'icons', '16']) ||
       null
+  }
+  get backgroundPage () {
+    return this.props.extension.getIn(['manifest', 'background', 'page']) || '_generated_background_page.html'
+  }
+  onInspect () {
+    const extensionId = this.props.extension.get('id')
+    const backgroundPage = this.backgroundPage
+    chrome.tabs.query(
+      {currentWindow: true, active: true},
+      function (tabArray) {
+        appActions.loadURLRequested(tabArray[0].id, 'chrome-extension://' + extensionId + '/' + backgroundPage)
+      }
+    )
   }
 
   render () {
@@ -80,7 +85,8 @@ class ExtensionItem extends ImmutableComponent {
           ? <div className='extensionPermissions'><span data-l10n-id='extensionPermissionsLabel' /> <span>{permissions.join(', ')}</span></div>
           : null
         }
-        <div className='extensionInspectViews'><span data-l10n-id='extensionInspectViewsLabel' /> <label className='linkTextSmall' onClick={this.onInspect}>_generated_background_page.html</label></div>
+
+        <div className='extensionInspectViews'><span data-l10n-id='extensionInspectViewsLabel' /> <label className={css(commonStyles.linkText, commonStyles.linkTextSmall)} onClick={this.onInspect}>{this.backgroundPage}</label></div>
       </div>
     </div>
   }
