@@ -146,6 +146,14 @@ module.exports = { "providers" :
       "image" : "https://searx.me/favicon.ico",
       "search" : "https://searx.me/?q={searchTerms}&categories=general",
       "shortcut" : ":x"
+    },
+    {
+      "name" : "yellCast",
+      "base" : "https://yellCast.com",
+      "image" : "https://yellCast.com/images/yC32.png",
+      "search" : "https://yellcast.com/?q={searchTerms}&loc={geo:locationString?}&at={geo:lat?}&lon={geo:lon?}&src=brave",
+      "autocomplete" : "https://yellcast.com/getcat.php?str={searchTerms}",
+      "shortcut" : ":yC"
     }
   ]
 }
